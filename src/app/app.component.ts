@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, Router } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -11,12 +12,20 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'eventos-front';
+  currentRoute: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentRoute = event.urlAfterRedirects;
+    });
+  }
 
   shouldShowNavbar(): boolean {
     // No mostrar navbar en rutas de autenticación
-    return !this.router.url.includes('/auth');
+    return !this.currentRoute.includes('/login') &&
+           !this.currentRoute.includes('/register') &&
+           !this.currentRoute.includes('/recuperar-password');
   }
 }
